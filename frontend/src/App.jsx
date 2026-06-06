@@ -9,6 +9,7 @@ import Masthead from "./components/Masthead.jsx";
 import StatsRail from "./components/StatsRail.jsx";
 import FilterPanel from "./components/FilterPanel.jsx";
 import JobEntry from "./components/JobEntry.jsx";
+import ResumeUpload from "./components/ResumeUpload.jsx";
 
 export default function App() {
   const [meta, setMeta] = useState(null);
@@ -124,6 +125,7 @@ export default function App() {
                 <p className="mt-2 font-sans text-xs text-accent">{refreshMsg}</p>
               )}
             </div>
+            <ResumeUpload />
             <StatsRail meta={meta} />
             <FilterPanel filters={filters} setFilters={setFilters} meta={meta} />
             <p className="font-mono text-[0.6rem] leading-relaxed uppercase tracking-[0.15em] text-ink-faint border-t border-rule pt-4">

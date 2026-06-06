@@ -51,6 +51,9 @@ cp preferences.example.txt preferences.txt # describe what you want
 ```
 Edit `config.py` to set the roles, locations, and filters you care about.
 
+Instead of editing `resume.txt` by hand, you can drag a PDF or DOCX résumé into
+the app once it's running — Claude extracts and structures it for you.
+
 ### Run
 ```bash
 task up        # build + start; web on :5173, api on :8000

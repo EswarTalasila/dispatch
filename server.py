@@ -1,16 +1,20 @@
 """FastAPI backend serving matched jobs from the local SQLite store to the
 React frontend. Run: uvicorn server:app --reload"""
 
+import os
 import re
 import threading
 
-from fastapi import FastAPI
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 import config
 import db
 import main as pipeline
 import progress
+import resume_intake
+
+RESUME_PATH = os.path.join(os.path.dirname(__file__), "resume.txt")
 
 app = FastAPI(title="Job Finder API")
 
@@ -87,6 +91,33 @@ def refresh():
 @app.get("/api/status")
 def status():
     return progress.snapshot()
+
+
+@app.get("/api/resume")
+def resume_info():
+    if os.path.exists(RESUME_PATH):
+        with open(RESUME_PATH) as f:
+            text = f.read()
+        return {"present": bool(text.strip()), "chars": len(text), "preview": text[:600]}
+    return {"present": False, "chars": 0, "preview": ""}
+
+
+@app.post("/api/resume")
+async def upload_resume(file: UploadFile = File(...)):
+    data = await file.read()
+    if len(data) > 5_000_000:
+        raise HTTPException(400, "File too large (max 5 MB).")
+    try:
+        raw = resume_intake.extract_text(file.filename, data)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    if not raw.strip():
+        raise HTTPException(400, "Couldn't read any text from that file.")
+
+    cleaned = resume_intake.clean_with_claude(raw)
+    with open(RESUME_PATH, "w") as f:
+        f.write(cleaned)
+    return {"ok": True, "chars": len(cleaned), "preview": cleaned[:600]}
 
 
 @app.get("/api/meta")
