@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function ResumeUpload({ appBusy, onChanged }) {
   const [resumes, setResumes] = useState([]);
@@ -146,10 +147,10 @@ export default function ResumeUpload({ appBusy, onChanged }) {
 
       {msg && <p className="mt-2 font-sans text-xs text-accent">{msg}</p>}
 
-      {preview && (
+      {preview && createPortal(
         <div
           onClick={() => setPreview(null)}
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -172,7 +173,8 @@ export default function ResumeUpload({ appBusy, onChanged }) {
               </pre>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </section>
   );
