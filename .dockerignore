@@ -8,4 +8,6 @@ seen.json
 resume.txt
 preferences.txt
 frontend/
+tests/
+pytest.ini
 *.md
