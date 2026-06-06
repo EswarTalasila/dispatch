@@ -1,0 +1,62 @@
+version: "3"
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds: [task --list]
+    silent: true
+
+  build:
+    desc: Build the Docker images
+    cmds: [docker compose build]
+
+  up:
+    desc: Start the app (web + api) in the background
+    cmds:
+      - docker compose up -d --build
+      - 'echo "Running — open http://localhost:5173"'
+
+  down:
+    desc: Stop the app
+    cmds: [docker compose down]
+
+  restart:
+    desc: Restart the containers
+    cmds: [docker compose restart]
+
+  logs:
+    desc: Tail logs from all containers
+    cmds: [docker compose logs -f]
+
+  ps:
+    desc: Show container status
+    cmds: [docker compose ps]
+
+  fetch:
+    desc: Run the job pipeline once now (fetch + score + store)
+    cmds: [docker compose run --rm api python main.py]
+
+  migrate:
+    desc: Copy existing local jobs.db and seen.json into the container volume
+    deps: [build]
+    cmds:
+      - docker compose run --rm -v "$PWD:/host" api sh -c "cp -n /host/jobs.db /data/jobs.db 2>/dev/null || true; cp -n /host/seen.json /data/seen.json 2>/dev/null || true; echo 'volume now holds:'; ls -la /data"
+
+  init:
+    desc: First-time setup — migrate local data, then start
+    cmds:
+      - task: migrate
+      - task: up
+
+  shell:
+    desc: Open a shell in the api container
+    cmds: [docker compose exec api bash]
+
+  streamlit:
+    desc: Run the Streamlit UI locally (no Docker)
+    cmds: ["./venv/bin/streamlit run app.py"]
+
+  clean:
+    desc: Stop and DELETE the data volume (wipes stored jobs)
+    prompt: This deletes all stored jobs in the container volume. Continue?
+    cmds: [docker compose down -v]

@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+.env
+jobs.db
+seen.json
+resume.txt
+preferences.txt
+frontend/
+*.md

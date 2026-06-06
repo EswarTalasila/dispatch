@@ -1,0 +1,27 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      JOBS_DB: /data/jobs.db
+      SEEN_FILE: /data/seen.json
+    volumes:
+      - jobdata:/data
+      # Mounted so you can edit these without rebuilding the image.
+      - ./resume.txt:/app/resume.txt
+      - ./preferences.txt:/app/preferences.txt
+      - ./config.py:/app/config.py
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+
+volumes:
+  jobdata:
