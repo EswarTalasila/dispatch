@@ -18,6 +18,11 @@ export async function triggerRefresh() {
   return res.json();
 }
 
+export async function triggerRescore() {
+  const res = await fetch("/api/rescore", { method: "POST" });
+  return res.json();
+}
+
 export async function getStatus() {
   const res = await fetch("/api/status");
   return res.json();

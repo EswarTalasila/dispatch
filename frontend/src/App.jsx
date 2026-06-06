@@ -3,6 +3,7 @@ import {
   fetchJobs,
   fetchMeta,
   triggerRefresh,
+  triggerRescore,
   getStatus,
 } from "./api.js";
 import Masthead from "./components/Masthead.jsx";
@@ -22,6 +23,7 @@ export default function App() {
     sort: "priority",
   });
   const [refreshing, setRefreshing] = useState(false);
+  const [busyLabel, setBusyLabel] = useState("Fetch new jobs");
   const [refreshMsg, setRefreshMsg] = useState("");
   const [prog, setProg] = useState({ stage: "", percent: 0 });
   const [bucket, setBucket] = useState("new");
@@ -43,13 +45,14 @@ export default function App() {
     return () => clearTimeout(handle);
   }, [filters]);
 
-  async function handleRefresh() {
+  async function runTask(trigger, label) {
     if (refreshing) return;
     setRefreshing(true);
+    setBusyLabel(label);
     setRefreshMsg("");
     setProg({ stage: "Starting…", percent: 2 });
     try {
-      await triggerRefresh();
+      await trigger();
     } catch {
       setRefreshing(false);
       setRefreshMsg("Couldn't reach the server.");
@@ -68,6 +71,9 @@ export default function App() {
       }
     }, 1000);
   }
+
+  const handleRefresh = () => runTask(triggerRefresh, "Fetching new jobs…");
+  const handleRescore = () => runTask(triggerRescore, "Re-scoring…");
 
   // "New" = jobs from the most recent fetch; "This week" = last 7 days.
   const latestDate = meta?.dates?.[0];
@@ -98,14 +104,14 @@ export default function App() {
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="w-full bg-ink text-paper font-sans font-semibold text-sm py-3 px-4 flex items-center justify-center gap-2 hover:bg-accent transition-colors disabled:opacity-70 disabled:cursor-wait"
+                className="w-full rounded-lg bg-accent text-paper font-sans font-semibold text-sm py-3 px-4 flex items-center justify-center gap-2 hover:bg-accent-deep transition-colors disabled:opacity-70 disabled:cursor-wait"
               >
                 <span
                   className={`text-base leading-none ${refreshing ? "animate-spin" : ""}`}
                 >
                   ↻
                 </span>
-                {refreshing ? "Fetching new jobs…" : "Fetch new jobs"}
+                {refreshing ? busyLabel : "Fetch new jobs"}
               </button>
               {refreshing && (
                 <div className="mt-3">
@@ -125,7 +131,7 @@ export default function App() {
                 <p className="mt-2 font-sans text-xs text-accent">{refreshMsg}</p>
               )}
             </div>
-            <ResumeUpload />
+            <ResumeUpload appBusy={refreshing} onUploaded={handleRescore} />
             <StatsRail meta={meta} />
             <FilterPanel filters={filters} setFilters={setFilters} meta={meta} />
             <p className="font-mono text-[0.6rem] leading-relaxed uppercase tracking-[0.15em] text-ink-faint border-t border-rule pt-4">
@@ -135,7 +141,7 @@ export default function App() {
 
           {/* Main column */}
           <main>
-            <div className="flex flex-wrap items-end gap-x-6 gap-y-2 border-b border-ink mb-2">
+            <div className="flex flex-wrap items-end gap-x-6 gap-y-2 border-b border-rule mb-4">
               <h2 className="kicker pb-2">The Listings</h2>
               <div className="ml-auto flex gap-5">
                 {[
@@ -174,7 +180,7 @@ export default function App() {
             )}
 
             {!loading && (
-              <div>
+              <div className="flex flex-col gap-3">
                 {displayed.map((job, i) => (
                   <JobEntry key={job.id} job={job} index={i} />
                 ))}

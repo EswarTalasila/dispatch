@@ -88,6 +88,22 @@ def refresh():
     return {"started": True, "running": True}
 
 
+def _run_rescore():
+    try:
+        n = pipeline.rescore()
+        progress.finish(f"Re-scored {n} job{'s' if n != 1 else ''} against your résumé.")
+    except Exception as e:
+        progress.finish(f"Re-score failed: {e}")
+
+
+@app.post("/api/rescore")
+def rescore():
+    if not progress.try_start():
+        return {"started": False, "running": True}
+    threading.Thread(target=_run_rescore, daemon=True).start()
+    return {"started": True, "running": True}
+
+
 @app.get("/api/status")
 def status():
     return progress.snapshot()

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function ResumeUpload() {
+export default function ResumeUpload({ appBusy, onUploaded }) {
   const [info, setInfo] = useState(null);
-  const [busy, setBusy] = useState(false);
+  const [parsing, setParsing] = useState(false);
   const [msg, setMsg] = useState("");
   const [drag, setDrag] = useState(false);
   const inputRef = useRef(null);
@@ -14,13 +14,15 @@ export default function ResumeUpload() {
       .catch(() => {});
   }, []);
 
+  const locked = parsing || appBusy;
+
   async function upload(file) {
-    if (!file) return;
+    if (!file || locked) return;
     if (!/\.(pdf|docx)$/i.test(file.name)) {
       setMsg("Please upload a PDF or DOCX.");
       return;
     }
-    setBusy(true);
+    setParsing(true);
     setMsg("");
     const form = new FormData();
     form.append("file", file);
@@ -29,22 +31,23 @@ export default function ResumeUpload() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Upload failed.");
       setInfo({ present: true, chars: data.chars });
-      setMsg("Parsed and saved — used on your next fetch.");
+      setMsg("Parsed — re-scoring your jobs against it…");
+      onUploaded?.();
     } catch (e) {
       setMsg(e.message);
     } finally {
-      setBusy(false);
+      setParsing(false);
     }
   }
 
   return (
     <section>
-      <h2 className="kicker border-b border-ink pb-2 mb-4">Résumé</h2>
+      <h2 className="kicker border-b border-rule pb-2 mb-4">Résumé</h2>
 
       <div
         onDragOver={(e) => {
           e.preventDefault();
-          setDrag(true);
+          if (!locked) setDrag(true);
         }}
         onDragLeave={() => setDrag(false)}
         onDrop={(e) => {
@@ -52,10 +55,10 @@ export default function ResumeUpload() {
           setDrag(false);
           upload(e.dataTransfer.files[0]);
         }}
-        onClick={() => !busy && inputRef.current?.click()}
-        className={`cursor-pointer border border-dashed px-4 py-6 text-center transition-colors ${
-          drag ? "border-accent bg-accent/5" : "border-rule hover:border-ink-soft"
-        } ${busy ? "cursor-wait opacity-70" : ""}`}
+        onClick={() => !locked && inputRef.current?.click()}
+        className={`rounded-xl border border-dashed px-4 py-6 text-center transition-colors ${
+          drag ? "border-accent bg-accent/10" : "border-rule hover:border-ink-soft"
+        } ${locked ? "cursor-wait opacity-70" : "cursor-pointer"}`}
       >
         <input
           ref={inputRef}
@@ -65,11 +68,11 @@ export default function ResumeUpload() {
           onChange={(e) => upload(e.target.files[0])}
         />
         <p className="font-sans text-sm text-ink-soft leading-snug">
-          {busy ? "Parsing with Claude…" : "Drag a PDF or DOCX here, or click to browse"}
+          {parsing ? "Parsing with Claude…" : "Drag a PDF or DOCX here, or click to browse"}
         </p>
       </div>
 
-      {info?.present && !busy && (
+      {info?.present && !parsing && (
         <p className="mt-2 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-ink-faint">
           On file · {info.chars} chars
         </p>

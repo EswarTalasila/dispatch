@@ -52,7 +52,9 @@ cp preferences.example.txt preferences.txt # describe what you want
 Edit `config.py` to set the roles, locations, and filters you care about.
 
 Instead of editing `resume.txt` by hand, you can drag a PDF or DOCX résumé into
-the app once it's running — Claude extracts and structures it for you.
+the app once it's running — Claude extracts and structures it for you. Uploading
+a new résumé automatically re-scores your existing jobs against it, so the
+rankings update right away (no re-fetch needed).
 
 ### Run
 ```bash

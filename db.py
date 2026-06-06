@@ -1,4 +1,4 @@
-"""Local SQLite store of matched jobs, read by the Streamlit frontend."""
+"""Local SQLite store of matched jobs, read by the web app and Streamlit."""
 
 import os
 import sqlite3
@@ -28,9 +28,14 @@ def init():
                 reason TEXT,
                 url TEXT,
                 role_query TEXT,
-                found_date TEXT
+                found_date TEXT,
+                description TEXT
             )
         """)
+        # Migrate older databases that predate the description column.
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(jobs)")]
+        if "description" not in cols:
+            conn.execute("ALTER TABLE jobs ADD COLUMN description TEXT")
 
 
 def save(jobs):
@@ -41,13 +46,25 @@ def save(jobs):
         for j in jobs:
             conn.execute("""
                 INSERT OR IGNORE INTO jobs
-                (id, title, company, location, score, priority, reason, url, role_query, found_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, title, company, location, score, priority, reason, url,
+                 role_query, found_date, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 j["id"], j["title"], j["company"], j["location"],
                 j["score"], j.get("priority", j["score"]), j["reason"],
-                j["url"], j["role_query"], today,
+                j["url"], j["role_query"], today, j.get("description", ""),
             ))
+
+
+def update_scores(jobs):
+    """Update score/priority/reason for existing jobs (used when re-scoring)."""
+    init()
+    with _connect() as conn:
+        for j in jobs:
+            conn.execute(
+                "UPDATE jobs SET score = ?, priority = ?, reason = ? WHERE id = ?",
+                (j["score"], j.get("priority", j["score"]), j["reason"], j["id"]),
+            )
 
 
 def load():

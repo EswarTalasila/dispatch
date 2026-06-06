@@ -78,5 +78,36 @@ def main():
     storage.save_seen(seen)
 
 
+def rescore():
+    """Re-score every stored job against the current resume.txt and update the DB.
+
+    Lets you swap your resume and instantly re-rank the jobs you already have,
+    without re-fetching.
+    """
+    jobs = db.load()
+    if not jobs:
+        progress.update(stage="No stored jobs to re-score", percent=90)
+        return 0
+
+    for j in jobs:
+        j["description"] = j.get("description") or ""
+
+    progress.update(stage=f"Re-scoring {len(jobs)} jobs…", percent=8)
+    scored = job_filter.score_jobs(
+        jobs,
+        progress_cb=lambda done, total: progress.update(
+            stage=f"Re-scoring with Claude… ({done}/{total})",
+            percent=8 + int(done / total * 87),
+        ),
+    )
+    for j in scored:
+        bonus = (len(config.LOCATION_TIERS) - location_rank(j["location"])) * 1000
+        j["priority"] = j["score"] + bonus
+
+    progress.update(stage="Saving…", percent=97)
+    db.update_scores(scored)
+    return len(scored)
+
+
 if __name__ == "__main__":
     main()
