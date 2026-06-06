@@ -124,6 +124,15 @@ def list_resumes():
     return [dict(r) for r in rows]
 
 
+def get_resume(resume_id):
+    init()
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT id, name, text FROM resumes WHERE id = ?", (resume_id,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
 def add_resume(name, text):
     """Save a new resume, make it active, and write it to the active file."""
     init()

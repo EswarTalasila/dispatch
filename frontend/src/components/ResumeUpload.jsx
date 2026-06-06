@@ -5,6 +5,7 @@ export default function ResumeUpload({ appBusy, onChanged }) {
   const [parsing, setParsing] = useState(false);
   const [msg, setMsg] = useState("");
   const [drag, setDrag] = useState(false);
+  const [preview, setPreview] = useState(null); // { name, text }
   const inputRef = useRef(null);
 
   const locked = parsing || appBusy;
@@ -27,6 +28,19 @@ export default function ResumeUpload({ appBusy, onChanged }) {
     await fetch(`/api/resumes/${id}/activate`, { method: "POST" }).catch(() => {});
     await load();
     onChanged?.();
+  }
+
+  async function showPreview(id) {
+    if (!id) return;
+    setMsg("");
+    try {
+      const res = await fetch(`/api/resumes/${id}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Couldn't load résumé.");
+      setPreview({ name: data.name, text: data.text });
+    } catch (e) {
+      setMsg(e.message);
+    }
   }
 
   async function remove(id) {
@@ -65,26 +79,35 @@ export default function ResumeUpload({ appBusy, onChanged }) {
       <h2 className="kicker border-b border-rule pb-2 mb-4">Résumés</h2>
 
       {resumes.length > 0 && (
-        <div className="mb-3 flex items-center gap-2">
-          <select
-            value={activeId}
-            disabled={locked}
-            onChange={(e) => activate(Number(e.target.value))}
-            className="flex-1 rounded-lg bg-paper-2 border border-rule px-3 py-2 font-sans text-sm text-ink focus:outline-none focus:border-accent disabled:opacity-60"
-          >
-            {resumes.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name} ({r.chars})
-              </option>
-            ))}
-          </select>
+        <div className="mb-3">
+          <div className="flex items-center gap-2">
+            <select
+              value={activeId}
+              disabled={locked}
+              onChange={(e) => activate(Number(e.target.value))}
+              className="flex-1 rounded-lg bg-paper-2 border border-rule px-3 py-2 font-sans text-sm text-ink focus:outline-none focus:border-accent disabled:opacity-60"
+            >
+              {resumes.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name} ({r.chars})
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => remove(activeId)}
+              disabled={locked || resumes.length <= 1}
+              title="Delete this résumé"
+              className="rounded-lg border border-rule px-3 py-2 text-ink-faint hover:text-accent hover:border-accent/40 transition-colors disabled:opacity-40 disabled:hover:text-ink-faint disabled:hover:border-rule"
+            >
+              ✕
+            </button>
+          </div>
           <button
-            onClick={() => remove(activeId)}
-            disabled={locked || resumes.length <= 1}
-            title="Delete this résumé"
-            className="rounded-lg border border-rule px-3 py-2 text-ink-faint hover:text-accent hover:border-accent/40 transition-colors disabled:opacity-40 disabled:hover:text-ink-faint disabled:hover:border-rule"
+            onClick={() => showPreview(activeId)}
+            disabled={!activeId}
+            className="mt-2 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-ink-soft hover:text-accent transition-colors disabled:opacity-40"
           >
-            ✕
+            Preview active résumé →
           </button>
         </div>
       )}
@@ -122,6 +145,35 @@ export default function ResumeUpload({ appBusy, onChanged }) {
       </div>
 
       {msg && <p className="mt-2 font-sans text-xs text-accent">{msg}</p>}
+
+      {preview && (
+        <div
+          onClick={() => setPreview(null)}
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex max-h-[80vh] w-full max-w-2xl flex-col rounded-2xl border border-rule bg-paper-2 shadow-2xl"
+          >
+            <div className="flex items-center justify-between border-b border-rule px-5 py-3">
+              <h3 className="font-sans text-sm font-semibold text-ink">
+                {preview.name}
+              </h3>
+              <button
+                onClick={() => setPreview(null)}
+                className="text-ink-faint hover:text-accent transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="overflow-y-auto px-5 py-4">
+              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink-soft">
+                {preview.text}
+              </pre>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

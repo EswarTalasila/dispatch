@@ -136,6 +136,14 @@ async def upload_resume(file: UploadFile = File(...)):
     return {"ok": True, "id": new_id, "name": name, "chars": len(cleaned)}
 
 
+@app.get("/api/resumes/{resume_id}")
+def get_resume(resume_id: int):
+    r = db.get_resume(resume_id)
+    if not r:
+        raise HTTPException(404, "Resume not found.")
+    return r
+
+
 @app.post("/api/resumes/{resume_id}/activate")
 def activate_resume(resume_id: int):
     if not db.activate_resume(resume_id):
