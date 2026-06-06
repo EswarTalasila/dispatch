@@ -11,6 +11,7 @@ function formatDate(iso) {
 
 export default function JobEntry({ job, index }) {
   const tier = fitTier(job.score);
+  const strong = job.score >= 75;
 
   return (
     <motion.article
@@ -21,25 +22,23 @@ export default function JobEntry({ job, index }) {
         delay: Math.min(index * 0.04, 0.5),
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="group relative border-t border-rule"
+      className="group rounded-2xl border border-rule bg-paper-2/70 backdrop-blur-sm p-5 sm:p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:bg-paper-2 hover:shadow-[0_14px_44px_-16px_rgba(0,0,0,0.8)]"
     >
-      {/* accent rule that slides in on hover */}
-      <span className="absolute left-0 top-0 h-full w-[3px] bg-accent scale-y-0 group-hover:scale-y-100 origin-top transition-transform duration-300" />
-
-      <div className="flex gap-5 sm:gap-8 py-7 pl-0 group-hover:pl-4 transition-[padding] duration-300">
-        {/* Fit score — the hero */}
-        <div className="shrink-0 w-[68px] sm:w-[88px] text-center">
+      <div className="flex gap-5 sm:gap-6">
+        {/* Fit score */}
+        <div className="shrink-0 w-[64px] sm:w-[80px] text-center">
           <div
-            className={`font-display font-black leading-none tabular-nums text-[2.6rem] sm:text-[3.4rem] ${tier.className}`}
+            className={`font-display font-black leading-none tabular-nums text-[2.4rem] sm:text-[3rem] ${tier.className}`}
+            style={strong ? { textShadow: "0 0 26px rgba(74,222,155,0.45)" } : undefined}
           >
             {job.score}
           </div>
-          <div className="mt-1.5 font-mono text-[0.6rem] uppercase tracking-[0.12em] text-ink-soft">
+          <div className="mt-1.5 font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-faint">
             {tier.label}
           </div>
-          <div className="mt-2 h-[3px] w-full bg-rule overflow-hidden">
+          <div className="mt-2.5 h-1 w-full rounded-full bg-paper-3 overflow-hidden">
             <div
-              className={`h-full ${job.score >= 75 ? "bg-accent" : "bg-ink"}`}
+              className={`h-full rounded-full ${strong ? "bg-accent" : "bg-ink-soft"}`}
               style={{ width: `${job.score}%` }}
             />
           </div>
@@ -47,24 +46,24 @@ export default function JobEntry({ job, index }) {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.64rem] uppercase tracking-[0.1em] text-ink-soft">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.62rem] uppercase tracking-[0.1em] text-ink-faint">
             <span>{job.role_query}</span>
-            <span className="text-ink-faint">/</span>
+            <span className="opacity-40">/</span>
             <span>{job.location}</span>
             {job.tier_label !== "OTHER" && (
-              <span className="bg-ink text-paper px-1.5 py-0.5 leading-none">
+              <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 leading-none text-accent">
                 {job.tier_label}
               </span>
             )}
-            <span className="ml-auto text-ink-faint">{formatDate(job.found_date)}</span>
+            <span className="ml-auto opacity-70">{formatDate(job.found_date)}</span>
           </div>
 
-          <h3 className="mt-2 font-display text-[1.45rem] sm:text-[1.7rem] leading-tight tracking-[-0.01em] text-ink">
+          <h3 className="mt-2 font-display text-[1.4rem] sm:text-[1.6rem] leading-tight tracking-[-0.01em] text-ink">
             {job.title}
           </h3>
-          <p className="mt-0.5 font-sans font-semibold text-ink">{job.company}</p>
+          <p className="mt-0.5 font-sans font-semibold text-ink-soft">{job.company}</p>
 
-          <p className="mt-3 font-display italic text-[1.02rem] leading-relaxed text-ink-soft max-w-2xl">
+          <p className="mt-3 font-sans text-[0.95rem] leading-relaxed text-ink-soft max-w-2xl">
             {job.reason}
           </p>
 
@@ -73,7 +72,7 @@ export default function JobEntry({ job, index }) {
               href={job.url}
               target="_blank"
               rel="noreferrer"
-              className="group/link mt-4 inline-flex items-center gap-2 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-accent"
+              className="group/link mt-4 inline-flex items-center gap-1.5 font-mono text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-accent"
             >
               Read the posting
               <span className="transition-transform duration-300 group-hover/link:translate-x-1">

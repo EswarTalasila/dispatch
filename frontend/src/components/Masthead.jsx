@@ -9,7 +9,7 @@ const FULL_DATE = new Date().toLocaleDateString("en-US", {
 
 export default function Masthead({ total }) {
   return (
-    <header className="border-b-[3px] border-ink pb-4">
+    <header className="border-b border-rule pb-5">
       <div className="flex items-center justify-between border-b border-rule pb-2">
         <span className="kicker">Est. MMXXVI · Raleigh, N.C.</span>
         <span className="kicker hidden sm:block">Edition № {total || "—"}</span>

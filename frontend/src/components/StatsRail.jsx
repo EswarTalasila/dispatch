@@ -14,7 +14,7 @@ export default function StatsRail({ meta }) {
   if (!meta) return null;
   return (
     <section>
-      <h2 className="kicker border-b border-ink pb-2 mb-4">The Numbers</h2>
+      <h2 className="kicker border-b border-rule pb-2 mb-4">The Numbers</h2>
       <div className="flex flex-col gap-3">
         <Stat label="Roles on file" value={meta.total} />
         <Stat label="Average fit" value={meta.avg_score} />

@@ -5,15 +5,15 @@
   --font-sans: "Libre Franklin", system-ui, sans-serif;
   --font-mono: "Libre Franklin", system-ui, sans-serif;
 
-  --color-paper: #f5f6f8;
-  --color-paper-2: #eaecf1;
-  --color-paper-3: #dfe2e9;
-  --color-ink: #14161c;
-  --color-ink-soft: #565c6b;
-  --color-ink-faint: #969cab;
-  --color-accent: #2347ff;
-  --color-accent-deep: #1834cc;
-  --color-rule: rgba(20, 22, 28, 0.13);
+  --color-paper: #0d0e12;
+  --color-paper-2: #15171e;
+  --color-paper-3: #1d2029;
+  --color-ink: #ecedf1;
+  --color-ink-soft: #9aa0ad;
+  --color-ink-faint: #6b7280;
+  --color-accent: #4ade9b;
+  --color-accent-deep: #2bb87a;
+  --color-rule: rgba(255, 255, 255, 0.09);
 }
 
 html {
@@ -26,31 +26,35 @@ body {
   background-color: var(--color-paper);
   background-image:
     radial-gradient(
-      110% 70% at 50% -15%,
-      rgba(255, 255, 255, 0.95) 0%,
-      rgba(245, 246, 248, 0) 55%
+      70% 50% at 50% -10%,
+      rgba(74, 222, 155, 0.12) 0%,
+      rgba(13, 14, 18, 0) 70%
     ),
     radial-gradient(
-      90% 55% at 100% 0%,
-      rgba(35, 71, 255, 0.07) 0%,
-      rgba(245, 246, 248, 0) 50%
-    );
+      45% 40% at 100% 0%,
+      rgba(74, 222, 155, 0.06) 0%,
+      rgba(13, 14, 18, 0) 60%
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+  background-size: auto, auto, 42px 42px, 42px 42px;
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
 
-/* Faint grain for a touch of texture without the heavy paper feel */
+/* Very faint grain for texture on the dark canvas */
 .grain {
   position: fixed;
   inset: 0;
   z-index: 50;
   pointer-events: none;
-  opacity: 0.12;
-  mix-blend-mode: multiply;
+  opacity: 0.04;
+  mix-blend-mode: screen;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 }
 
-/* Small-caps editorial label */
+/* Small-caps label */
 .kicker {
   font-family: var(--font-sans);
   font-weight: 600;
@@ -65,8 +69,9 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 2px;
-  background: var(--color-rule);
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-paper-3);
   outline: none;
   cursor: pointer;
 }
@@ -77,15 +82,15 @@ input[type="range"]::-webkit-slider-thumb {
   height: 16px;
   border-radius: 999px;
   background: var(--color-accent);
-  border: 2px solid var(--color-paper);
-  box-shadow: 0 1px 4px rgba(28, 24, 21, 0.35);
+  border: 3px solid var(--color-paper);
+  box-shadow: 0 0 12px rgba(74, 222, 155, 0.5);
 }
 input[type="range"]::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 999px;
   background: var(--color-accent);
-  border: 2px solid var(--color-paper);
+  border: 3px solid var(--color-paper);
 }
 
 ::selection {
@@ -99,5 +104,6 @@ input[type="text"] {
   font-family: var(--font-sans);
 }
 select option {
-  color: #1c1815;
+  background: var(--color-paper-2);
+  color: var(--color-ink);
 }
