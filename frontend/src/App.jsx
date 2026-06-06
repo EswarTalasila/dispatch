@@ -97,7 +97,7 @@ export default function App() {
 
         <div className="mt-7 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-10 lg:gap-14">
           {/* Sidebar */}
-          <aside className="lg:sticky lg:top-10 self-start flex flex-col gap-10">
+          <aside className="self-start flex flex-col gap-10">
             <div>
               <button
                 onClick={handleRefresh}
