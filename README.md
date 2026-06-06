@@ -1,5 +1,7 @@
 # Dispatch
 
+[![ci](https://github.com/EswarTalasila/dispatch/actions/workflows/ci.yml/badge.svg)](https://github.com/EswarTalasila/dispatch/actions/workflows/ci.yml)
+
 A personal job board that finds roles worth your time. Dispatch pulls fresh
 listings, has Claude score each one against your résumé and preferences, and
 serves the good matches in a clean web app — sorted by fit and location, split
@@ -88,6 +90,16 @@ There's also a Streamlit view: `streamlit run app.py`.
 Set `NOTION_TOKEN` and `NOTION_DATABASE_ID` in `.env` to also mirror matches to a
 Notion database (columns: Title, Company, Location, Score, Priority, Why, Role,
 Link). Leave them blank to skip Notion entirely.
+
+## Tests
+Backend tests (pytest) cover location tiering, the database and résumé library,
+résumé extraction, and the API endpoints (sorting, filtering, résumé CRUD):
+```
+pip install -r requirements.txt
+pytest
+```
+GitHub Actions (`.github/workflows/ci.yml`) runs the backend tests and a
+frontend production build on every push and pull request.
 
 ## License
 MIT
