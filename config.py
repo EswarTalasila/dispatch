@@ -46,5 +46,9 @@ EXCLUDE_COMPANIES = [
 # Only keep jobs Claude scores at or above this (0-100).
 MIN_SCORE = 55
 
+# Jobs scored per Claude call. Bigger = fewer calls (less repeated overhead),
+# but a failed batch loses more jobs at once. ~25 is a good balance.
+SCORE_BATCH_SIZE = 25
+
 # Claude model used for ranking. Haiku is cheap and good enough here.
 MODEL = "claude-haiku-4-5-20251001"

@@ -1,7 +1,8 @@
 """Scores each job against your resume + preferences using Claude.
 
-Your resume and preferences are sent as cached system blocks, so you only
-pay full price for them once; subsequent batches reuse the cache.
+Jobs are scored in batches to amortize the system prompt across many listings.
+(A cache_control block is set on the resume/preferences, but note it only takes
+effect once that prefix exceeds the model's caching minimum.)
 """
 
 import json
@@ -11,7 +12,7 @@ from anthropic import Anthropic
 
 import config
 
-BATCH_SIZE = 10  # jobs per Claude call
+BATCH_SIZE = config.SCORE_BATCH_SIZE  # jobs per Claude call
 
 SYSTEM_INSTRUCTIONS = """You are a job-matching assistant. Given a candidate's \
 resume and preferences, score how well each job fits and how realistic the \
@@ -56,6 +57,7 @@ def score_jobs(jobs, progress_cb=None):
     ]
 
     scored = []
+    usage = {"input": 0, "output": 0, "cache_read": 0}
     for start in range(0, len(jobs), BATCH_SIZE):
         batch = jobs[start:start + BATCH_SIZE]
         listing_text = "\n\n".join(
@@ -72,6 +74,9 @@ def score_jobs(jobs, progress_cb=None):
                 "content": f"Score these {len(batch)} jobs:\n\n{listing_text}",
             }],
         )
+        usage["input"] += msg.usage.input_tokens
+        usage["output"] += msg.usage.output_tokens
+        usage["cache_read"] += getattr(msg.usage, "cache_read_input_tokens", 0) or 0
         try:
             results = _parse(msg.content[0].text)
         except (json.JSONDecodeError, IndexError) as e:
@@ -89,6 +94,10 @@ def score_jobs(jobs, progress_cb=None):
         if progress_cb:
             progress_cb(start // BATCH_SIZE + 1, total_batches)
 
+    print(
+        f"  tokens: {usage['input']} in / {usage['output']} out"
+        f" / {usage['cache_read']} cache-read across {total_batches} batches"
+    )
     return scored
 
 
