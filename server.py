@@ -14,8 +14,6 @@ import main as pipeline
 import progress
 import resume_intake
 
-RESUME_PATH = os.path.join(os.path.dirname(__file__), "resume.txt")
-
 app = FastAPI(title="Job Finder API")
 
 app.add_middleware(
@@ -109,13 +107,9 @@ def status():
     return progress.snapshot()
 
 
-@app.get("/api/resume")
-def resume_info():
-    if os.path.exists(RESUME_PATH):
-        with open(RESUME_PATH) as f:
-            text = f.read()
-        return {"present": bool(text.strip()), "chars": len(text), "preview": text[:600]}
-    return {"present": False, "chars": 0, "preview": ""}
+@app.get("/api/resumes")
+def list_resumes():
+    return {"resumes": db.list_resumes()}
 
 
 @app.post("/api/resume")
@@ -131,9 +125,22 @@ async def upload_resume(file: UploadFile = File(...)):
         raise HTTPException(400, "Couldn't read any text from that file.")
 
     cleaned = resume_intake.clean_with_claude(raw)
-    with open(RESUME_PATH, "w") as f:
-        f.write(cleaned)
-    return {"ok": True, "chars": len(cleaned), "preview": cleaned[:600]}
+    name = os.path.splitext(file.filename or "")[0].strip() or "Résumé"
+    new_id = db.add_resume(name, cleaned)
+    return {"ok": True, "id": new_id, "name": name, "chars": len(cleaned)}
+
+
+@app.post("/api/resumes/{resume_id}/activate")
+def activate_resume(resume_id: int):
+    if not db.activate_resume(resume_id):
+        raise HTTPException(404, "Resume not found.")
+    return {"ok": True}
+
+
+@app.delete("/api/resumes/{resume_id}")
+def delete_resume(resume_id: int):
+    active_id = db.delete_resume(resume_id)
+    return {"ok": True, "active_id": active_id}
 
 
 @app.get("/api/meta")

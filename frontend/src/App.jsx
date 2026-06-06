@@ -131,7 +131,7 @@ export default function App() {
                 <p className="mt-2 font-sans text-xs text-accent">{refreshMsg}</p>
               )}
             </div>
-            <ResumeUpload appBusy={refreshing} onUploaded={handleRescore} />
+            <ResumeUpload appBusy={refreshing} onChanged={handleRescore} />
             <StatsRail meta={meta} />
             <FilterPanel filters={filters} setFilters={setFilters} meta={meta} />
             <p className="font-mono text-[0.6rem] leading-relaxed uppercase tracking-[0.15em] text-ink-faint border-t border-rule pt-4">
