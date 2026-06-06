@@ -29,7 +29,7 @@ export async function getStatus() {
 }
 
 export function fitTier(score) {
-  if (score >= 75) return { label: "Strong", className: "text-accent" };
-  if (score >= 60) return { label: "Solid", className: "text-ink" };
-  return { label: "Stretch", className: "text-ink-soft" };
+  if (score >= 75) return { label: "Strong", className: "text-ink" };
+  if (score >= 60) return { label: "Solid", className: "text-ink-soft" };
+  return { label: "Stretch", className: "text-ink-faint" };
 }

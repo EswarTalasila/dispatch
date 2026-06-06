@@ -5,15 +5,40 @@
   --font-sans: "Libre Franklin", system-ui, sans-serif;
   --font-mono: "Libre Franklin", system-ui, sans-serif;
 
-  --color-paper: #0d0e12;
-  --color-paper-2: #15171e;
-  --color-paper-3: #1d2029;
-  --color-ink: #ecedf1;
-  --color-ink-soft: #9aa0ad;
-  --color-ink-faint: #6b7280;
-  --color-accent: #4ade9b;
-  --color-accent-deep: #2bb87a;
-  --color-rule: rgba(255, 255, 255, 0.09);
+  /* Defaults (light); overridden per data-theme below. */
+  --color-paper: #fbfaf8;
+  --color-paper-2: #f1efea;
+  --color-paper-3: #e6e3dc;
+  --color-ink: #1a1a18;
+  --color-ink-soft: #5c5a55;
+  --color-ink-faint: #9b9890;
+  --color-accent: #1a1a18;
+  --color-accent-deep: #000000;
+  --color-rule: rgba(26, 26, 24, 0.14);
+}
+
+html[data-theme="light"] {
+  --color-paper: #fbfaf8;
+  --color-paper-2: #f1efea;
+  --color-paper-3: #e6e3dc;
+  --color-ink: #1a1a18;
+  --color-ink-soft: #5c5a55;
+  --color-ink-faint: #9b9890;
+  --color-accent: #1a1a18;
+  --color-accent-deep: #000000;
+  --color-rule: rgba(26, 26, 24, 0.14);
+}
+
+html[data-theme="dark"] {
+  --color-paper: #141413;
+  --color-paper-2: #1d1d1b;
+  --color-paper-3: #292927;
+  --color-ink: #f3f1ec;
+  --color-ink-soft: #a8a59d;
+  --color-ink-faint: #6f6c64;
+  --color-accent: #f3f1ec;
+  --color-accent-deep: #ffffff;
+  --color-rule: rgba(255, 255, 255, 0.14);
 }
 
 html {
@@ -24,26 +49,9 @@ html {
 body {
   margin: 0;
   background-color: var(--color-paper);
-  background-image:
-    radial-gradient(
-      75% 50% at 50% -10%,
-      rgba(74, 222, 155, 0.10) 0%,
-      rgba(13, 14, 18, 0) 70%
-    );
-  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
-}
-
-/* Very faint grain for texture on the dark canvas */
-.grain {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  pointer-events: none;
-  opacity: 0.04;
-  mix-blend-mode: screen;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Small-caps label */
@@ -75,7 +83,6 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 999px;
   background: var(--color-accent);
   border: 3px solid var(--color-paper);
-  box-shadow: 0 0 12px rgba(74, 222, 155, 0.5);
 }
 input[type="range"]::-moz-range-thumb {
   width: 16px;
@@ -90,7 +97,6 @@ input[type="range"]::-moz-range-thumb {
   color: var(--color-paper);
 }
 
-/* Native control theming */
 select,
 input[type="text"] {
   font-family: var(--font-sans);

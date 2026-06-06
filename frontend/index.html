@@ -10,6 +10,17 @@
       rel="stylesheet"
     />
     <title>Dispatch — Jobs, ranked</title>
+    <script>
+      // Set the theme before paint to avoid a flash.
+      (function () {
+        var t =
+          localStorage.getItem("theme") ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

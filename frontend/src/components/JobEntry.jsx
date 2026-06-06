@@ -29,7 +29,6 @@ export default function JobEntry({ job, index }) {
         <div className="shrink-0 w-[64px] sm:w-[80px] text-center">
           <div
             className={`font-display font-black leading-none tabular-nums text-[2.4rem] sm:text-[3rem] ${tier.className}`}
-            style={strong ? { textShadow: "0 0 26px rgba(74,222,155,0.45)" } : undefined}
           >
             {job.score}
           </div>
@@ -38,7 +37,7 @@ export default function JobEntry({ job, index }) {
           </div>
           <div className="mt-2.5 h-1 w-full rounded-full bg-paper-3 overflow-hidden">
             <div
-              className={`h-full rounded-full ${strong ? "bg-accent" : "bg-ink-soft"}`}
+              className={`h-full rounded-full ${strong ? "bg-ink" : "bg-ink-faint"}`}
               style={{ width: `${job.score}%` }}
             />
           </div>
@@ -51,7 +50,7 @@ export default function JobEntry({ job, index }) {
             <span className="opacity-40">/</span>
             <span>{job.location}</span>
             {job.tier_label !== "OTHER" && (
-              <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 leading-none text-accent">
+              <span className="rounded-full border border-rule bg-paper-3 px-2 py-0.5 leading-none text-ink-soft">
                 {job.tier_label}
               </span>
             )}

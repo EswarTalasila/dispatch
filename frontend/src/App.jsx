@@ -92,8 +92,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <div className="grain" />
-
       <div className="mx-auto max-w-6xl px-5 sm:px-8 py-8 sm:py-12">
         <Masthead total={meta?.total} />
 
