@@ -51,27 +51,19 @@ export default function FilterPanel({ filters, setFilters, meta }) {
           </select>
         </label>
 
-        <div>
-          <span className="kicker">Order by</span>
-          <div className="mt-2 grid grid-cols-2 gap-px bg-rule border border-rule rounded-lg overflow-hidden">
-            {[
-              { key: "priority", label: "Fit + Place" },
-              { key: "score", label: "Fit only" },
-            ].map((opt) => (
-              <button
-                key={opt.key}
-                onClick={() => update({ sort: opt.key })}
-                className={`py-2 font-mono text-[0.7rem] uppercase tracking-widest transition-colors ${
-                  filters.sort === opt.key
-                    ? "bg-accent text-paper"
-                    : "bg-paper-2 text-ink-soft hover:text-ink"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <label className="block">
+          <span className="kicker">Sort by</span>
+          <select
+            value={filters.sort}
+            onChange={(e) => update({ sort: e.target.value })}
+            className="mt-2 w-full rounded-lg bg-paper-2 border border-rule px-3 py-2 font-sans text-sm text-ink focus:outline-none focus:border-accent"
+          >
+            <option value="score">Best fit (score)</option>
+            <option value="priority">Best fit + location (NC, TX first)</option>
+            <option value="new">Newest first</option>
+            <option value="company">Company (A–Z)</option>
+          </select>
+        </label>
       </div>
     </section>
   );

@@ -20,7 +20,7 @@ export default function App() {
     q: "",
     min_score: 0,
     role: "",
-    sort: "priority",
+    sort: "score",
   });
   const [refreshing, setRefreshing] = useState(false);
   const [busyLabel, setBusyLabel] = useState("Fetch new jobs");

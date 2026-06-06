@@ -49,7 +49,7 @@ def get_jobs(
     min_score: int = 0,
     role: str = "",
     date: str = "",
-    sort: str = "priority",
+    sort: str = "score",
 ):
     jobs = [enrich(j) for j in db.load()]
 
@@ -63,8 +63,14 @@ def get_jobs(
     if date:
         jobs = [j for j in jobs if j["found_date"] == date]
 
-    key = "score" if sort == "score" else "priority"
-    jobs.sort(key=lambda j: (j.get(key) or 0), reverse=True)
+    if sort == "priority":
+        jobs.sort(key=lambda j: j.get("priority") or 0, reverse=True)
+    elif sort == "new":
+        jobs.sort(key=lambda j: (j.get("found_date") or "", j.get("score") or 0), reverse=True)
+    elif sort == "company":
+        jobs.sort(key=lambda j: ((j.get("company") or "").lower(), -(j.get("score") or 0)))
+    else:  # "score"
+        jobs.sort(key=lambda j: j.get("score") or 0, reverse=True)
     return jobs
 
 
