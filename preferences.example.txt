@@ -1,0 +1,10 @@
+Describe what you want in plain English, then save this as preferences.txt
+(cp preferences.example.txt preferences.txt). Claude weighs this when scoring.
+
+Example:
+
+I'm looking for entry-level / new-grad software and AI/ML engineering roles in
+the US. Remote or hybrid preferred. I want roles where I realistically have a
+shot — 0-3 years of experience — so score senior/staff roles low even if the
+topic matches. Strong fit: Python, LLMs, RAG, FastAPI, full-stack with React.
+Avoid: senior roles, frontend-only, hardware, sales engineering, clearance-required.

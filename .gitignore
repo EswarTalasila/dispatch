@@ -1,0 +1,9 @@
+.env
+seen.json
+jobs.db
+resume.txt
+preferences.txt
+__pycache__/
+*.pyc
+venv/
+.venv/
