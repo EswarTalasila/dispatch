@@ -53,14 +53,14 @@ def fetch_role(role):
     return jobs
 
 
-def _excluded_by_title(title):
-    low = title.lower()
-    return any(kw in low for kw in config.EXCLUDE_TITLE_KEYWORDS)
-
-
-def _excluded_by_company(company):
-    low = company.lower()
-    return any(c in low for c in config.EXCLUDE_COMPANIES)
+def _is_excluded(job):
+    """Drop senior-sounding titles and blacklisted companies before scoring."""
+    title = job["title"].lower()
+    company = job["company"].lower()
+    return (
+        any(kw in title for kw in config.EXCLUDE_TITLE_KEYWORDS)
+        or any(c in company for c in config.EXCLUDE_COMPANIES)
+    )
 
 
 def fetch_all(progress_cb=None):
@@ -70,11 +70,7 @@ def fetch_all(progress_cb=None):
     total = len(config.SEARCH_ROLES)
     for i, role in enumerate(config.SEARCH_ROLES):
         for job in fetch_role(role):
-            if not job["id"] or job["id"] in seen_ids:
-                continue
-            if _excluded_by_title(job["title"]):
-                continue
-            if _excluded_by_company(job["company"]):
+            if not job["id"] or job["id"] in seen_ids or _is_excluded(job):
                 continue
             seen_ids.add(job["id"])
             out.append(job)

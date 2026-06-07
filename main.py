@@ -28,6 +28,12 @@ def location_rank(location):
     return len(config.LOCATION_TIERS)
 
 
+def location_priority_bonus(location):
+    """Location weight added to a job's score so NC, then TX, then everywhere
+    else sort to the top. Used as the Notion sort key."""
+    return (len(config.LOCATION_TIERS) - location_rank(location)) * 1000
+
+
 def main():
     seen = storage.load_seen()
 
@@ -55,11 +61,8 @@ def main():
         ),
     )
     matches = [j for j in scored if j["score"] >= config.MIN_SCORE]
-    # Priority = match score plus a location bonus so NC, then TX, then
-    # everywhere else sort to the top. Used as the Notion sort key.
     for j in matches:
-        bonus = (len(config.LOCATION_TIERS) - location_rank(j["location"])) * 1000
-        j["priority"] = j["score"] + bonus
+        j["priority"] = j["score"] + location_priority_bonus(j["location"])
     matches.sort(key=lambda j: -j["priority"])
     print(f"{len(matches)} jobs scored >= {config.MIN_SCORE}.")
 
@@ -101,8 +104,7 @@ def rescore():
         ),
     )
     for j in scored:
-        bonus = (len(config.LOCATION_TIERS) - location_rank(j["location"])) * 1000
-        j["priority"] = j["score"] + bonus
+        j["priority"] = j["score"] + location_priority_bonus(j["location"])
 
     progress.update(stage="Saving…", percent=97)
     db.update_scores(scored)

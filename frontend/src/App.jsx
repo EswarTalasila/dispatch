@@ -30,8 +30,12 @@ export default function App() {
   const filtersRef = useRef(filters);
   filtersRef.current = filters;
 
-  useEffect(() => {
+  function reloadMeta() {
     fetchMeta().then(setMeta).catch(() => {});
+  }
+
+  useEffect(() => {
+    reloadMeta();
   }, []);
 
   useEffect(() => {
@@ -66,7 +70,7 @@ export default function App() {
         clearInterval(poll);
         setRefreshing(false);
         setRefreshMsg(s.message || "Done.");
-        fetchMeta().then(setMeta).catch(() => {});
+        reloadMeta();
         fetchJobs(filtersRef.current).then(setJobs).catch(() => {});
       }
     }, 1000);

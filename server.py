@@ -2,13 +2,11 @@
 React frontend. Run: uvicorn server:app --reload"""
 
 import os
-import re
 import threading
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-import config
 import db
 import main as pipeline
 import progress
@@ -24,13 +22,8 @@ app.add_middleware(
 )
 
 
-def location_tier(location):
-    low = (location or "").lower()
-    for tier, keywords in enumerate(config.LOCATION_TIERS):
-        if any(re.search(rf"\b{re.escape(kw)}\b", low) for kw in keywords):
-            return tier
-    return len(config.LOCATION_TIERS)
-
+# Single source of truth for tiering lives in the pipeline; the API reuses it.
+location_tier = pipeline.location_rank
 
 TIER_LABELS = {0: "NC", 1: "TX"}
 
@@ -74,38 +67,44 @@ def get_jobs(
     return jobs
 
 
+def _plural(n):
+    return "" if n == 1 else "s"
+
+
+def _start_background(worker):
+    """Run worker in a daemon thread if no run is in progress."""
+    if not progress.try_start():
+        return {"started": False, "running": True}
+    threading.Thread(target=worker, daemon=True).start()
+    return {"started": True, "running": True}
+
+
 def _run_pipeline():
     try:
         before = len(db.load())
         pipeline.main()
         added = len(db.load()) - before
-        progress.finish(f"Done — {added} new job{'s' if added != 1 else ''} added.")
+        progress.finish(f"Done — {added} new job{_plural(added)} added.")
     except Exception as e:
         progress.finish(f"Refresh failed: {e}")
-
-
-@app.post("/api/refresh")
-def refresh():
-    if not progress.try_start():
-        return {"started": False, "running": True}
-    threading.Thread(target=_run_pipeline, daemon=True).start()
-    return {"started": True, "running": True}
 
 
 def _run_rescore():
     try:
         n = pipeline.rescore()
-        progress.finish(f"Re-scored {n} job{'s' if n != 1 else ''} against your résumé.")
+        progress.finish(f"Re-scored {n} job{_plural(n)} against your résumé.")
     except Exception as e:
         progress.finish(f"Re-score failed: {e}")
 
 
+@app.post("/api/refresh")
+def refresh():
+    return _start_background(_run_pipeline)
+
+
 @app.post("/api/rescore")
 def rescore():
-    if not progress.try_start():
-        return {"started": False, "running": True}
-    threading.Thread(target=_run_rescore, daemon=True).start()
-    return {"started": True, "running": True}
+    return _start_background(_run_rescore)
 
 
 @app.get("/api/status")
