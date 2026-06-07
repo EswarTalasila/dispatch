@@ -23,6 +23,11 @@ export async function triggerRescore() {
   return res.json();
 }
 
+export async function triggerCancel() {
+  const res = await fetch("/api/cancel", { method: "POST" });
+  return res.json();
+}
+
 export async function getStatus() {
   const res = await fetch("/api/status");
   return res.json();

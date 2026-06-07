@@ -15,8 +15,12 @@ export default function ResumeUpload({ appBusy, onChanged }) {
   function load() {
     return fetch("/api/resumes")
       .then((r) => r.json())
-      .then((d) => setResumes(d.resumes || []))
-      .catch(() => {});
+      .then((d) => {
+        const list = d.resumes || [];
+        setResumes(list);
+        return list;
+      })
+      .catch(() => []);
   }
 
   useEffect(() => {
@@ -45,10 +49,15 @@ export default function ResumeUpload({ appBusy, onChanged }) {
   }
 
   async function remove(id) {
-    if (locked || !id || resumes.length <= 1) return;
+    if (locked || !id) return;
+    if (!window.confirm("Delete this résumé? This can't be undone.")) return;
+    setMsg("");
     await fetch(`/api/resumes/${id}`, { method: "DELETE" }).catch(() => {});
-    await load();
-    onChanged?.();
+    const list = await load();
+    // The ✕ deletes the active résumé; if another became active, re-score
+    // against it. If none remain, leave existing scores untouched.
+    if (list.some((r) => r.active)) onChanged?.();
+    else setMsg("Résumé deleted. Add one to re-score your jobs.");
   }
 
   async function upload(file) {
@@ -96,7 +105,7 @@ export default function ResumeUpload({ appBusy, onChanged }) {
             </select>
             <button
               onClick={() => remove(activeId)}
-              disabled={locked || resumes.length <= 1}
+              disabled={locked}
               title="Delete this résumé"
               className="rounded-lg border border-rule px-3 py-2 text-ink-faint hover:text-accent hover:border-accent/40 transition-colors disabled:opacity-40 disabled:hover:text-ink-faint disabled:hover:border-rule"
             >

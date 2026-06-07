@@ -4,6 +4,7 @@ import {
   fetchMeta,
   triggerRefresh,
   triggerRescore,
+  triggerCancel,
   getStatus,
 } from "./api.js";
 import Masthead from "./components/Masthead.jsx";
@@ -79,6 +80,11 @@ export default function App() {
   const handleRefresh = () => runTask(triggerRefresh, "Fetching new jobs…");
   const handleRescore = () => runTask(triggerRescore, "Re-scoring…");
 
+  function handleCancel() {
+    setProg((p) => ({ ...p, stage: "Cancelling…" }));
+    triggerCancel().catch(() => {});
+  }
+
   // "New" = jobs from the most recent fetch; "This week" = last 7 days.
   const latestDate = meta?.dates?.[0];
   const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
@@ -127,6 +133,12 @@ export default function App() {
                       style={{ width: `${prog.percent}%` }}
                     />
                   </div>
+                  <button
+                    onClick={handleCancel}
+                    className="mt-2 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-ink-soft hover:text-accent transition-colors"
+                  >
+                    Cancel
+                  </button>
                 </div>
               )}
               {!refreshing && refreshMsg && (
@@ -143,30 +155,45 @@ export default function App() {
 
           {/* Main column */}
           <main>
-            <div className="flex flex-wrap items-end gap-x-6 gap-y-2 border-b border-rule mb-4">
-              <h2 className="kicker pb-2">The Listings</h2>
-              <div className="ml-auto flex gap-5">
-                {[
-                  { id: "new", label: "New" },
-                  { id: "week", label: "This week" },
-                  { id: "all", label: "All" },
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setBucket(t.id)}
-                    className={`-mb-px border-b-2 pb-2 font-sans text-sm transition-colors ${
-                      bucket === t.id
-                        ? "border-accent text-ink font-semibold"
-                        : "border-transparent text-ink-soft hover:text-ink"
-                    }`}
-                  >
-                    {t.label}{" "}
-                    <span className="font-mono text-xs tabular-nums text-ink-faint">
-                      {counts[t.id]}
-                    </span>
-                  </button>
-                ))}
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b border-rule mb-4">
+              <div className="flex items-end gap-5">
+                <h2 className="kicker pb-2">The Listings</h2>
+                <div className="flex gap-5">
+                  {[
+                    { id: "new", label: "New" },
+                    { id: "week", label: "This week" },
+                    { id: "all", label: "All" },
+                  ].map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => setBucket(t.id)}
+                      className={`-mb-px border-b-2 pb-2 font-sans text-sm transition-colors ${
+                        bucket === t.id
+                          ? "border-accent text-ink font-semibold"
+                          : "border-transparent text-ink-soft hover:text-ink"
+                      }`}
+                    >
+                      {t.label}{" "}
+                      <span className="font-mono text-xs tabular-nums text-ink-faint">
+                        {counts[t.id]}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
+              <label className="flex items-center gap-2 pb-2">
+                <span className="kicker">Sort</span>
+                <select
+                  value={filters.sort}
+                  onChange={(e) => setFilters((f) => ({ ...f, sort: e.target.value }))}
+                  className="rounded-md bg-paper-2 border border-rule px-2 py-1 font-sans text-xs text-ink focus:outline-none focus:border-accent"
+                >
+                  <option value="score">Best fit</option>
+                  <option value="priority">Fit + location</option>
+                  <option value="new">Newest</option>
+                  <option value="company">Company A–Z</option>
+                </select>
+              </label>
             </div>
 
             {loading && (

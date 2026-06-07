@@ -50,20 +50,6 @@ export default function FilterPanel({ filters, setFilters, meta }) {
             ))}
           </select>
         </label>
-
-        <label className="block">
-          <span className="kicker">Sort by</span>
-          <select
-            value={filters.sort}
-            onChange={(e) => update({ sort: e.target.value })}
-            className="mt-2 w-full rounded-lg bg-paper-2 border border-rule px-3 py-2 font-sans text-sm text-ink focus:outline-none focus:border-accent"
-          >
-            <option value="score">Best fit (score)</option>
-            <option value="priority">Best fit + location (NC, TX first)</option>
-            <option value="new">Newest first</option>
-            <option value="company">Company (A–Z)</option>
-          </select>
-        </label>
       </div>
     </section>
   );
