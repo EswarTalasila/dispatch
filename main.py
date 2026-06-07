@@ -42,7 +42,8 @@ def main():
         progress_cb=lambda done, total: progress.update(
             stage=f"Searching Adzuna… ({done}/{total} roles)",
             percent=5 + int(done / total * 6),
-        )
+        ),
+        cancel_check=progress.raise_if_cancelled,
     )
     print(f"Fetched {len(all_jobs)} listings.")
 
@@ -59,6 +60,7 @@ def main():
             stage=f"Scoring with Claude… ({done}/{total})",
             percent=12 + int(done / total * 78),
         ),
+        cancel_check=progress.raise_if_cancelled,
     )
     matches = [j for j in scored if j["score"] >= config.MIN_SCORE]
     for j in matches:
@@ -102,6 +104,7 @@ def rescore():
             stage=f"Re-scoring with Claude… ({done}/{total})",
             percent=8 + int(done / total * 87),
         ),
+        cancel_check=progress.raise_if_cancelled,
     )
     for j in scored:
         j["priority"] = j["score"] + location_priority_bonus(j["location"])

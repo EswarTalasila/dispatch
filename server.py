@@ -85,6 +85,8 @@ def _run_pipeline():
         pipeline.main()
         added = len(db.load()) - before
         progress.finish(f"Done — {added} new job{_plural(added)} added.")
+    except progress.Cancelled:
+        progress.finish("Cancelled — no changes saved.")
     except Exception as e:
         progress.finish(f"Refresh failed: {e}")
 
@@ -93,6 +95,8 @@ def _run_rescore():
     try:
         n = pipeline.rescore()
         progress.finish(f"Re-scored {n} job{_plural(n)} against your résumé.")
+    except progress.Cancelled:
+        progress.finish("Cancelled — no changes saved.")
     except Exception as e:
         progress.finish(f"Re-score failed: {e}")
 
@@ -105,6 +109,11 @@ def refresh():
 @app.post("/api/rescore")
 def rescore():
     return _start_background(_run_rescore)
+
+
+@app.post("/api/cancel")
+def cancel():
+    return {"cancelled": progress.request_cancel()}
 
 
 @app.get("/api/status")

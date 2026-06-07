@@ -63,12 +63,14 @@ def _is_excluded(job):
     )
 
 
-def fetch_all(progress_cb=None):
+def fetch_all(progress_cb=None, cancel_check=None):
     """Fetch every configured role, deduped by job id and seniority-filtered."""
     seen_ids = set()
     out = []
     total = len(config.SEARCH_ROLES)
     for i, role in enumerate(config.SEARCH_ROLES):
+        if cancel_check:
+            cancel_check()
         for job in fetch_role(role):
             if not job["id"] or job["id"] in seen_ids or _is_excluded(job):
                 continue

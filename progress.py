@@ -3,6 +3,11 @@
 import threading
 from datetime import datetime
 
+
+class Cancelled(Exception):
+    """Raised at a checkpoint when the user cancels a running job."""
+
+
 _lock = threading.Lock()
 _state = {
     "running": False,
@@ -10,6 +15,7 @@ _state = {
     "percent": 0,
     "message": "",
     "finished_at": None,
+    "cancel": False,
 }
 
 
@@ -19,7 +25,8 @@ def try_start():
         if _state["running"]:
             return False
         _state.update(
-            running=True, stage="Starting…", percent=2, message="", finished_at=None
+            running=True, stage="Starting…", percent=2, message="",
+            finished_at=None, cancel=False,
         )
         return True
 
@@ -32,6 +39,27 @@ def update(stage=None, percent=None):
             _state["percent"] = max(0, min(100, int(percent)))
 
 
+def request_cancel():
+    """Ask a running job to stop at its next checkpoint. False if nothing's running."""
+    with _lock:
+        if not _state["running"]:
+            return False
+        _state["cancel"] = True
+        _state["stage"] = "Cancelling…"
+        return True
+
+
+def cancelled():
+    with _lock:
+        return _state["cancel"]
+
+
+def raise_if_cancelled():
+    """Pipeline checkpoints call this to bail out early when cancelled."""
+    if cancelled():
+        raise Cancelled()
+
+
 def finish(message):
     with _lock:
         _state.update(
@@ -40,6 +68,7 @@ def finish(message):
             percent=100,
             message=message,
             finished_at=datetime.now().isoformat(timespec="seconds"),
+            cancel=False,
         )
 
 

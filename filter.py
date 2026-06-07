@@ -41,7 +41,7 @@ def _read(path):
         return f.read().strip()
 
 
-def score_jobs(jobs, progress_cb=None):
+def score_jobs(jobs, progress_cb=None, cancel_check=None):
     client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     resume = _read("resume.txt")
     preferences = _read("preferences.txt")
@@ -59,6 +59,8 @@ def score_jobs(jobs, progress_cb=None):
     scored = []
     usage = {"input": 0, "output": 0, "cache_read": 0}
     for start in range(0, len(jobs), BATCH_SIZE):
+        if cancel_check:
+            cancel_check()
         batch = jobs[start:start + BATCH_SIZE]
         listing_text = "\n\n".join(
             f"[{i}] {j['title']} at {j['company']} ({j['location']})\n"
