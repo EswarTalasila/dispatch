@@ -27,6 +27,14 @@ export default function ResumeUpload({ appBusy, onChanged }) {
     load();
   }, []);
 
+  // Close the preview modal on Escape.
+  useEffect(() => {
+    if (!preview) return;
+    const onKey = (e) => e.key === "Escape" && setPreview(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [preview]);
+
   async function activate(id) {
     if (locked || !id) return;
     setMsg("");
@@ -134,6 +142,15 @@ export default function ResumeUpload({ appBusy, onChanged }) {
           upload(e.dataTransfer.files[0]);
         }}
         onClick={() => !locked && inputRef.current?.click()}
+        role="button"
+        tabIndex={locked ? -1 : 0}
+        aria-label="Add a résumé (PDF or DOCX)"
+        onKeyDown={(e) => {
+          if (!locked && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
         className={`rounded-xl border border-dashed px-4 py-5 text-center transition-colors ${
           drag ? "border-accent bg-accent/10" : "border-rule hover:border-ink-soft"
         } ${locked ? "cursor-wait opacity-70" : "cursor-pointer"}`}
@@ -158,11 +175,14 @@ export default function ResumeUpload({ appBusy, onChanged }) {
 
       {preview && createPortal(
         <div
-          onClick={() => setPreview(null)}
+          onClick={(e) => e.target === e.currentTarget && setPreview(null)}
+          onKeyDown={(e) => e.key === "Enter" && setPreview(null)}
+          role="button"
+          tabIndex={0}
+          aria-label="Close preview"
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
         >
           <div
-            onClick={(e) => e.stopPropagation()}
             className="flex max-h-[80vh] w-full max-w-2xl flex-col rounded-2xl border border-rule bg-paper-2 shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-rule px-5 py-3">
