@@ -11,8 +11,10 @@ services:
       - ./resume.txt:/app/resume.txt
       - ./preferences.txt:/app/preferences.txt
       - ./config.py:/app/config.py
+    # Bind to localhost only — nginx reaches the API over the internal Docker
+    # network, so the API never needs to be exposed on the host's network.
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     restart: unless-stopped
 
   web:

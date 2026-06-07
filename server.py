@@ -127,6 +127,8 @@ async def upload_resume(file: UploadFile = File(...)):
         raw = resume_intake.extract_text(file.filename, data)
     except ValueError as e:
         raise HTTPException(400, str(e))
+    except Exception:
+        raise HTTPException(400, "Couldn't parse that file — make sure it's a valid PDF or DOCX.")
     if not raw.strip():
         raise HTTPException(400, "Couldn't read any text from that file.")
 

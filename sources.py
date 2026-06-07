@@ -27,8 +27,15 @@ def fetch_role(role):
         if config.LOCATION:
             params["where"] = config.LOCATION
 
-        resp = requests.get(url, params=params, timeout=30)
-        resp.raise_for_status()
+        # Don't use raise_for_status(): its message embeds the full URL, which
+        # includes app_id/app_key. Raise a clean error so keys never leak into
+        # logs or the /api/status message.
+        try:
+            resp = requests.get(url, params=params, timeout=30)
+        except requests.RequestException:
+            raise RuntimeError("Adzuna request failed (network error)")
+        if resp.status_code != 200:
+            raise RuntimeError(f"Adzuna request failed (HTTP {resp.status_code})")
 
         results = resp.json().get("results", [])
         if not results:
