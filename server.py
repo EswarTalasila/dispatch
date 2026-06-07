@@ -3,6 +3,7 @@ React frontend. Run: uvicorn server:app --reload"""
 
 import os
 import threading
+from typing import Annotated
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,8 +18,8 @@ app = FastAPI(title="Job Finder API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Content-Type"],
 )
 
 
@@ -126,8 +127,8 @@ def list_resumes():
     return {"resumes": db.list_resumes()}
 
 
-@app.post("/api/resume")
-async def upload_resume(file: UploadFile = File(...)):
+@app.post("/api/resume", responses={400: {"description": "Invalid or unreadable file"}})
+async def upload_resume(file: Annotated[UploadFile, File()]):
     data = await file.read()
     if len(data) > 5_000_000:
         raise HTTPException(400, "File too large (max 5 MB).")
@@ -146,7 +147,7 @@ async def upload_resume(file: UploadFile = File(...)):
     return {"ok": True, "id": new_id, "name": name, "chars": len(cleaned)}
 
 
-@app.get("/api/resumes/{resume_id}")
+@app.get("/api/resumes/{resume_id}", responses={404: {"description": "Resume not found"}})
 def get_resume(resume_id: int):
     r = db.get_resume(resume_id)
     if not r:
@@ -154,7 +155,10 @@ def get_resume(resume_id: int):
     return r
 
 
-@app.post("/api/resumes/{resume_id}/activate")
+@app.post(
+    "/api/resumes/{resume_id}/activate",
+    responses={404: {"description": "Resume not found"}},
+)
 def activate_resume(resume_id: int):
     if not db.activate_resume(resume_id):
         raise HTTPException(404, "Resume not found.")

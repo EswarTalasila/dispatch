@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export default function FilterPanel({ filters, setFilters, meta }) {
   const update = (patch) => setFilters((f) => ({ ...f, ...patch }));
 
@@ -17,7 +19,7 @@ export default function FilterPanel({ filters, setFilters, meta }) {
           />
         </label>
 
-        <label className="block">
+        <div>
           <div className="flex items-center justify-between">
             <span className="kicker">Minimum fit</span>
             <span className="font-mono text-sm text-accent tabular-nums">
@@ -26,6 +28,7 @@ export default function FilterPanel({ filters, setFilters, meta }) {
           </div>
           <input
             type="range"
+            aria-label="Minimum fit"
             min="0"
             max="100"
             step="5"
@@ -33,7 +36,7 @@ export default function FilterPanel({ filters, setFilters, meta }) {
             onChange={(e) => update({ min_score: Number(e.target.value) })}
             className="mt-3"
           />
-        </label>
+        </div>
 
         <label className="block">
           <span className="kicker">Role search</span>
@@ -54,3 +57,9 @@ export default function FilterPanel({ filters, setFilters, meta }) {
     </section>
   );
 }
+
+FilterPanel.propTypes = {
+  filters: PropTypes.object.isRequired,
+  setFilters: PropTypes.func.isRequired,
+  meta: PropTypes.object,
+};

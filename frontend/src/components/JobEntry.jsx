@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import PropTypes from "prop-types";
 import { fitTier } from "../api.js";
 
 function formatDate(iso) {
@@ -73,7 +74,7 @@ export default function JobEntry({ job, index }) {
               rel="noreferrer"
               className="group/link mt-4 inline-flex items-center gap-1.5 font-mono text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-accent"
             >
-              Read the posting
+              Read the posting{" "}
               <span className="transition-transform duration-300 group-hover/link:translate-x-1">
                 →
               </span>
@@ -84,3 +85,8 @@ export default function JobEntry({ job, index }) {
     </motion.article>
   );
 }
+
+JobEntry.propTypes = {
+  job: PropTypes.object.isRequired,
+  index: PropTypes.number,
+};

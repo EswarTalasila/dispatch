@@ -53,7 +53,12 @@ st.caption(f"Showing {len(filtered)} of {len(jobs)} jobs")
 # --- Render ---
 for j in filtered:
     score = int(j["score"])
-    color = "#16a34a" if score >= 75 else "#ca8a04" if score >= 60 else "#9ca3af"
+    if score >= 75:
+        color = "#16a34a"
+    elif score >= 60:
+        color = "#ca8a04"
+    else:
+        color = "#9ca3af"
     left, right = st.columns([0.08, 0.92])
     with left:
         st.markdown(

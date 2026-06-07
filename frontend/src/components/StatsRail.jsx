@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 function Stat({ label, value }) {
   return (
     <div className="flex items-baseline gap-2">
@@ -9,6 +11,11 @@ function Stat({ label, value }) {
     </div>
   );
 }
+
+Stat.propTypes = {
+  label: PropTypes.string,
+  value: PropTypes.node,
+};
 
 export default function StatsRail({ meta }) {
   if (!meta) return null;
@@ -25,3 +32,7 @@ export default function StatsRail({ meta }) {
     </section>
   );
 }
+
+StatsRail.propTypes = {
+  meta: PropTypes.object,
+};

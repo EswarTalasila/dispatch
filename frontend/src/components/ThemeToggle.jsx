@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState(
-    () => document.documentElement.getAttribute("data-theme") || "light",
+    () => document.documentElement.dataset.theme || "light",
   );
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.dataset.theme = theme;
     localStorage.setItem("theme", theme);
   }, [theme]);
 

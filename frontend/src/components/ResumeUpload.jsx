@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import PropTypes from "prop-types";
 
 export default function ResumeUpload({ appBusy, onChanged }) {
   const [resumes, setResumes] = useState([]);
   const [parsing, setParsing] = useState(false);
   const [msg, setMsg] = useState("");
   const [drag, setDrag] = useState(false);
-  const [preview, setPreview] = useState(null); // { name, text }
+  const [preview, setPreview] = useState(null); // the résumé being previewed
   const inputRef = useRef(null);
 
   const locked = parsing || appBusy;
@@ -31,8 +32,8 @@ export default function ResumeUpload({ appBusy, onChanged }) {
   useEffect(() => {
     if (!preview) return;
     const onKey = (e) => e.key === "Escape" && setPreview(null);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    globalThis.addEventListener("keydown", onKey);
+    return () => globalThis.removeEventListener("keydown", onKey);
   }, [preview]);
 
   async function activate(id) {
@@ -58,7 +59,7 @@ export default function ResumeUpload({ appBusy, onChanged }) {
 
   async function remove(id) {
     if (locked || !id) return;
-    if (!window.confirm("Delete this résumé? This can't be undone.")) return;
+    if (!globalThis.confirm("Delete this résumé? This can't be undone.")) return;
     setMsg("");
     await fetch(`/api/resumes/${id}`, { method: "DELETE" }).catch(() => {});
     const list = await load();
@@ -92,6 +93,10 @@ export default function ResumeUpload({ appBusy, onChanged }) {
     }
   }
 
+  let dropLabel = "Drag a PDF or DOCX here, or click to browse";
+  if (parsing) dropLabel = "Parsing with Claude…";
+  else if (resumes.length) dropLabel = "Add another résumé (PDF or DOCX)";
+
   return (
     <section>
       <h2 className="kicker border-b border-rule pb-2 mb-4">Résumés</h2>
@@ -103,6 +108,7 @@ export default function ResumeUpload({ appBusy, onChanged }) {
               value={activeId}
               disabled={locked}
               onChange={(e) => activate(Number(e.target.value))}
+              aria-label="Active résumé"
               className="flex-1 rounded-lg bg-paper-2 border border-rule px-3 py-2 font-sans text-sm text-ink focus:outline-none focus:border-accent disabled:opacity-60"
             >
               {resumes.map((r) => (
@@ -112,6 +118,7 @@ export default function ResumeUpload({ appBusy, onChanged }) {
               ))}
             </select>
             <button
+              type="button"
               onClick={() => remove(activeId)}
               disabled={locked}
               title="Delete this résumé"
@@ -121,6 +128,7 @@ export default function ResumeUpload({ appBusy, onChanged }) {
             </button>
           </div>
           <button
+            type="button"
             onClick={() => showPreview(activeId)}
             disabled={!activeId}
             className="mt-2 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-ink-soft hover:text-accent transition-colors disabled:opacity-40"
@@ -130,7 +138,17 @@ export default function ResumeUpload({ appBusy, onChanged }) {
         </div>
       )}
 
-      <div
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.docx"
+        className="hidden"
+        onChange={(e) => upload(e.target.files[0])}
+      />
+      <button
+        type="button"
+        disabled={locked}
+        onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
           if (!locked) setDrag(true);
@@ -141,70 +159,51 @@ export default function ResumeUpload({ appBusy, onChanged }) {
           setDrag(false);
           upload(e.dataTransfer.files[0]);
         }}
-        onClick={() => !locked && inputRef.current?.click()}
-        role="button"
-        tabIndex={locked ? -1 : 0}
         aria-label="Add a résumé (PDF or DOCX)"
-        onKeyDown={(e) => {
-          if (!locked && (e.key === "Enter" || e.key === " ")) {
-            e.preventDefault();
-            inputRef.current?.click();
-          }
-        }}
-        className={`rounded-xl border border-dashed px-4 py-5 text-center transition-colors ${
+        className={`w-full rounded-xl border border-dashed px-4 py-5 text-center transition-colors ${
           drag ? "border-accent bg-accent/10" : "border-rule hover:border-ink-soft"
         } ${locked ? "cursor-wait opacity-70" : "cursor-pointer"}`}
       >
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".pdf,.docx"
-          className="hidden"
-          onChange={(e) => upload(e.target.files[0])}
-        />
-        <p className="font-sans text-sm text-ink-soft leading-snug">
-          {parsing
-            ? "Parsing with Claude…"
-            : resumes.length
-              ? "Add another résumé (PDF or DOCX)"
-              : "Drag a PDF or DOCX here, or click to browse"}
-        </p>
-      </div>
+        <span className="block font-sans text-sm text-ink-soft leading-snug">
+          {dropLabel}
+        </span>
+      </button>
 
       {msg && <p className="mt-2 font-sans text-xs text-accent">{msg}</p>}
 
-      {preview && createPortal(
-        <div
-          onClick={(e) => e.target === e.currentTarget && setPreview(null)}
-          onKeyDown={(e) => e.key === "Enter" && setPreview(null)}
-          role="button"
-          tabIndex={0}
-          aria-label="Close preview"
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-        >
-          <div
-            className="flex max-h-[80vh] w-full max-w-2xl flex-col rounded-2xl border border-rule bg-paper-2 shadow-2xl"
-          >
-            <div className="flex items-center justify-between border-b border-rule px-5 py-3">
-              <h3 className="font-sans text-sm font-semibold text-ink">
-                {preview.name}
-              </h3>
-              <button
-                onClick={() => setPreview(null)}
-                className="text-ink-faint hover:text-accent transition-colors"
-              >
-                ✕
-              </button>
+      {preview &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+            <div
+              className="flex max-h-[80vh] w-full max-w-2xl flex-col rounded-2xl border border-rule bg-paper-2 shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b border-rule px-5 py-3">
+                <h3 className="font-sans text-sm font-semibold text-ink">
+                  {preview.name}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setPreview(null)}
+                  aria-label="Close"
+                  className="text-ink-faint hover:text-accent transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="overflow-y-auto px-5 py-4">
+                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink-soft">
+                  {preview.text}
+                </pre>
+              </div>
             </div>
-            <div className="overflow-y-auto px-5 py-4">
-              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink-soft">
-                {preview.text}
-              </pre>
-            </div>
-          </div>
-        </div>,
-        document.body,
-      )}
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }
+
+ResumeUpload.propTypes = {
+  appBusy: PropTypes.bool,
+  onChanged: PropTypes.func,
+};

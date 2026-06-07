@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import PropTypes from "prop-types";
 import ThemeToggle from "./ThemeToggle.jsx";
 
 const FULL_DATE = new Date().toLocaleDateString("en-US", {
@@ -36,3 +37,7 @@ export default function Masthead({ total }) {
     </header>
   );
 }
+
+Masthead.propTypes = {
+  total: PropTypes.number,
+};
